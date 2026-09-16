@@ -1,0 +1,16 @@
+{
+    "name": "NiumaCharacter.Runtime",
+    "rootNamespace": "NiumaCharacter",
+    "references": [
+        "GUID:5be169b1a333162449c670d567b47df1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
