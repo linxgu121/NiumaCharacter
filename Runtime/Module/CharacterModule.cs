@@ -6,7 +6,7 @@ namespace NiumaCharacter
     /// <summary>
     /// 角色模块入口：管理目录生命周期，并向 GameContext 提供查询能力
     /// </summary>
-    public class CharacterModule : IGameModule, ICharacterCatalogQuery, ICharacterPrefabQuery
+    public class CharacterModule : IGameModule, ICharacterCatalogQuery, ICharacterPrefabQuery, ICharacterSelection
     {
         #region 依赖与运行状态
 
@@ -17,12 +17,15 @@ namespace NiumaCharacter
         private GameContext _context;
         private CharacterCatalog _catalog;
         private CharacterPrefabCatalog _prefabCatalog;
+        private CharacterSelectionService _selectionCha;
 
         public string ModuleName => "Niuma.Character";
 
         public bool IsStarted { get; private set; }
 
         public string LastError { get; private set; } = string.Empty;
+
+        public ushort? SelectedCharacterId => IsStarted ? _selectionCha?.SelectedCharacterId : null;
 
         #endregion
 
@@ -52,16 +55,18 @@ namespace NiumaCharacter
             _context = context;
             _catalog = null;
             _prefabCatalog = null;
+            _selectionCha = null;
             LastError = string.Empty;
 
             if (_context == null)
             {
-                LastError = "角色模块初始化失败：缺少 GameContext。";
+                LastError = "角色模块初始化失败：缺少 GameContext";
                 return;
             }
 
             CharacterCatalog catalog = new CharacterCatalog();
             CharacterPrefabCatalog prefabCatalog = new CharacterPrefabCatalog();
+            //CharacterSelectionService selectionCha = new CharacterSelectionService(this);
 
             if (!catalog.Initialize(_catalogSO))
             {
@@ -78,6 +83,9 @@ namespace NiumaCharacter
             // 只有建表成功，才保存为可用目录。
             _catalog = catalog;
             _prefabCatalog = prefabCatalog;
+            _selectionCha = new CharacterSelectionService(this);
+            //_selectionCha = selectionCha;
+            
         }
 
         /// <summary>
@@ -88,7 +96,7 @@ namespace NiumaCharacter
             if (IsStarted)
                 return;
 
-            if (_context == null || _catalog == null || _prefabCatalog == null)
+            if (_context == null || _catalog == null || _prefabCatalog == null || _selectionCha == null)
             {
                 if (string.IsNullOrEmpty(LastError))
                     LastError = "角色模块尚未成功初始化，无法启动。";
@@ -100,7 +108,9 @@ namespace NiumaCharacter
             if (_context.TryGetService<ICharacterCatalogQuery>(out var catalogQuery)
                 && !ReferenceEquals(catalogQuery, this)
                 || _context.TryGetService<ICharacterPrefabQuery>(out var prefabQuery)
-                && !ReferenceEquals(prefabQuery, this))
+                && !ReferenceEquals(prefabQuery, this)
+                || (_context.TryGetService<ICharacterSelection>(out var selection)
+                && !ReferenceEquals(selection, this)))
             {
                 LastError = "角色模块启动失败：已存在其他角色目录查询服务。";
                 return;
@@ -108,6 +118,7 @@ namespace NiumaCharacter
 
             _context.RegisterService<ICharacterCatalogQuery>(this);
             _context.RegisterService<ICharacterPrefabQuery>(this);
+            _context.RegisterService<ICharacterSelection>(this);
 
             IsStarted = true;
             LastError = string.Empty;
@@ -131,6 +142,13 @@ namespace NiumaCharacter
                 && ReferenceEquals(prefabQuery, this))
             {
                 _context.UnregisterService<ICharacterPrefabQuery>();
+            }
+
+            if (_context != null
+                && _context.TryGetService<ICharacterSelection>(out var selection)
+                && ReferenceEquals(selection, this))
+            {
+                _context.UnregisterService<ICharacterSelection>();
             }
 
             IsStarted = false;
@@ -178,6 +196,26 @@ namespace NiumaCharacter
             }
 
             return _prefabCatalog.TryGetPreviewPrefab(characterId, out prefab);
+        }
+
+        #endregion
+
+        #region 角色选择
+
+        public bool TrySelect(ushort characterId, out string error)
+        {
+            if(!IsStarted || _selectionCha == null)
+            {
+                error = "角色模块尚未启动，无法选择角色";
+                return false;
+            }
+
+            return _selectionCha.TrySelect(characterId, out error);
+        }
+
+        public void ClearSelection()
+        {
+            _selectionCha?.Clear();
         }
 
         #endregion

@@ -1,5 +1,8 @@
 namespace NiumaCharacter
 {
+    /// <summary>
+    /// 角色目录查询接口
+    /// </summary>
     public interface ICharacterCatalogQuery
     {
         /// <summary>
