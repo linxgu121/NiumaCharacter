@@ -85,7 +85,7 @@ namespace NiumaCharacter
             _prefabCatalog = prefabCatalog;
             _selectionCha = new CharacterSelectionService(this);
             //_selectionCha = selectionCha;
-            
+
         }
 
         /// <summary>
@@ -129,29 +129,32 @@ namespace NiumaCharacter
         /// </summary>
         public void StopModule()
         {
-            // 两种能力分别注销，而且只移除属于当前实例的注册。
-            if (_context != null
-                && _context.TryGetService<ICharacterCatalogQuery>(out var catalogQuery)
+            // 先关闭对外入口，再清理本次运行的选择。
+            IsStarted = false;
+            _selectionCha?.Clear();
+
+            if (_context == null)
+                return;
+
+            // 多种能力分别注销，而且只移除属于当前实例的注册。
+            if (_context.TryGetService<ICharacterCatalogQuery>(out var catalogQuery)
                 && ReferenceEquals(catalogQuery, this))
             {
                 _context.UnregisterService<ICharacterCatalogQuery>();
             }
 
-            if (_context != null
-                && _context.TryGetService<ICharacterPrefabQuery>(out var prefabQuery)
+            if (_context.TryGetService<ICharacterPrefabQuery>(out var prefabQuery)
                 && ReferenceEquals(prefabQuery, this))
             {
                 _context.UnregisterService<ICharacterPrefabQuery>();
             }
 
-            if (_context != null
-                && _context.TryGetService<ICharacterSelection>(out var selection)
+            if (_context.TryGetService<ICharacterSelection>(out var selection)
                 && ReferenceEquals(selection, this))
             {
                 _context.UnregisterService<ICharacterSelection>();
             }
 
-            IsStarted = false;
         }
         public void Tick(float deltaTime)
         {
@@ -204,7 +207,7 @@ namespace NiumaCharacter
 
         public bool TrySelect(ushort characterId, out string error)
         {
-            if(!IsStarted || _selectionCha == null)
+            if (!IsStarted || _selectionCha == null)
             {
                 error = "角色模块尚未启动，无法选择角色";
                 return false;

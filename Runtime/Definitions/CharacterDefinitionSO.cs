@@ -2,6 +2,10 @@ using UnityEngine;
 
 namespace NiumaCharacter
 {
+    /// <summary>
+    /// 角色定义
+    /// (用于记录角色ID、名称属性的)
+    /// </summary>
     [CreateAssetMenu(fileName = "XXXConfig",menuName = "NiumaCharacter/Character/CharacterConfig")]
     public class CharacterDefinitionSO : ScriptableObject
     {

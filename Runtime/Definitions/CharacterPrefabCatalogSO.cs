@@ -7,7 +7,7 @@ namespace NiumaCharacter
     /// 当前游戏的角色预制体映射配置。
     /// 配置与查询分离，运行时索引由独立服务建立。
     /// </summary>
-    [CreateAssetMenu(fileName = "GameCharacterPrefabCatalog",menuName = "NiumaCharacter/Character/PrefabCatalog")]
+    [CreateAssetMenu(fileName = "GameCharacterPrefabCatalog",menuName = "NiumaCharacter/PrefabCatalog")]
     public class CharacterPrefabCatalogSO : ScriptableObject
     {
         [Header("角色预制体映射")]

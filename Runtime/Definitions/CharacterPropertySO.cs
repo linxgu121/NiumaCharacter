@@ -4,7 +4,7 @@ using UnityEngine.TextCore.Text;
 
 namespace NiumaCharacter
 {
-    [CreateAssetMenu(fileName = "CharacterProperty",menuName = "NiumaCharacter/Character/Property/CharacterProperty")]
+    [CreateAssetMenu(fileName = "CharacterProperty",menuName = "NiumaCharacter/Character/Property/XXXProperty")]
     public class CharacterPropertySO : ScriptableObject
     {
         [Header("角色基础属性")]
